@@ -88,6 +88,74 @@ void* initialAgentList(){
     
 }
 
+void* printagents()
+{
+    printf(" ============ \t ============ \t ============ \t ============ \n");
+    for (int i=0; i<4; i++)
+    {
+        //int F_size = sizeof(AgentArr[i].forward);
+        int ordergiver = 0;
+        printf("Agent %d :  Forward players : \n",i+1);
+        for (int j=0; j<10; j++)
+        {
+            if (AgentArr[i].forward[j] != 0)
+            {
+                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].forward[j] );
+            }
+            else
+            {
+                ordergiver++;
+            }    
+        }
+        printf("\n \n");
+        ordergiver = 0;
+        printf("Agent %d :  Midfielder players : \n",i+1 );
+        for (int j=0; j<10; j++)
+        {
+            if (AgentArr[i].midfielder[j] != 0)
+            {
+                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].midfielder[j] );
+            }
+            else
+            {
+                ordergiver++;
+            }
+        }
+        printf("\n \n");
+        ordergiver = 0;
+        printf("Agent %d :  Defender Players : \n", i+1);
+        for (int j=0; j<10; j++)
+        {
+            if (AgentArr[i].defender[j] != 0)
+            {
+                printf("- pl %d : %.2lf M -",j-ordergiver+1,AgentArr[i].defender[j] );
+            }
+            else
+            {
+                ordergiver++;
+            }
+        }
+        printf("\n \n");
+        ordergiver = 0;
+        printf("Agent %d :  Goal keepers : \n", i+1);
+        for (int j=0; j<10; j++)
+        {
+            if (AgentArr[i].goalkeeper[j] != 0)
+            {
+                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].goalkeeper[j] );
+            }
+            else
+            {
+                ordergiver++;
+            }
+        }
+        printf("\n \n");
+        ordergiver = 0;
+        printf(" --- \n");
+    }
+    printf(" ============ \t ============ \t ============ \t ============ \n");
+}
+
 int main(){
 
     time_t t;
@@ -104,7 +172,7 @@ int main(){
     {
         pthread_join(agentsTid[i], NULL);
     }
-    
+    printagents(AgentArr);
     //each clubs lists and budgets are randomly generated and their transfer process
     for (int i = 0; i < 5; i++)
     {
