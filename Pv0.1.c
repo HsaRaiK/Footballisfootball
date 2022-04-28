@@ -91,36 +91,36 @@ void* scout()
         int priceStrat = rand() % 2;
         switch(newPlayerPos)
             {
-                case '0':
+                case 0:
                     switch(priceStrat)
                     {
-                        case '0':
+                        case 0:
                             AgentArr[newPlayerChance-4].forward[0] -= 0.5;
-                        case '1':
+                        case 1:
                             AgentArr[newPlayerChance-4].forward[0] += 1;
                     }
-                case '1':
+                case 1:
                     switch(priceStrat)
                     {
-                        case '0':
+                        case 0:
                             AgentArr[newPlayerChance-4].midfielder[0] -= 0.5;
-                        case '1':
+                        case 1:
                             AgentArr[newPlayerChance-4].midfielder[0] += 1;
                     }
-                case '2':
+                case 2:
                     switch(priceStrat)
                     {
-                        case '0':
+                        case 0:
                             AgentArr[newPlayerChance-4].defender[0] -= 0.5;
-                        case '1':
+                        case 1:
                             AgentArr[newPlayerChance-4].defender[0] += 1;
                     }
-                case '3':
+                case 3:
                     switch(priceStrat)
                     {
-                        case '0':
+                        case 0:
                             AgentArr[newPlayerChance-4].goalkeeper[0] -= 0.5;
-                        case '1':
+                        case 1:
                             AgentArr[newPlayerChance-4].goalkeeper[0] += 1;
                     }    
                 
