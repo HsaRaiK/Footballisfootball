@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdint.h>
 struct Clubs{
     char name;
     double budget;
@@ -24,6 +25,26 @@ double getTeamBudget(){
     int budgetindx = (int)(rand() % (5)); // Random budget of either 10,20,30,40,50
     return (double)budgets[budgetindx];
 }
+int transfer(int p , int clubIndex, int agentNum){
+    int playerPos = p;
+    switch(playerPos){    
+        case 1:    
+            printf("looking for forward - agent %d\n", agentNum);    
+            break;    
+        case 2:    
+            printf("looking for mid - agent %d\n", agentNum);    
+            break;    
+        case 3:    
+            printf("looking for def - agent %d\n", agentNum);    
+            break;  
+        case 4:    
+            printf("looking for goalk - agent %d\n", agentNum);    
+            break;  
+        default:    
+            break;
+    }    
+    return 0; 
+}
 
 void* clubThread(){
     int curIndx = clubIndx++;
@@ -34,32 +55,43 @@ void* clubThread(){
     // tansferlist = 5 players [0-5], agent number and player position [2] = {agentnum, playerpos}
     for (int i = 0; i < 5; i++)
     {
-        ClubArr[curIndx].transferList[i][0] = (rand() % (4 + 1)); // 0-4
+        ClubArr[curIndx].transferList[i][0] = (rand() % (3 + 1)); // 0-3
         ClubArr[curIndx].transferList[i][1] = (rand() % (4 + 1 - 1) + 1); // 1-4
         ClubArr[curIndx].transferList[i][2] = 0; // 0 -> not transferred, 1 -> transferred
         printf(" | Agent: %d, Player: %d |",ClubArr[curIndx].transferList[i][0],ClubArr[curIndx].transferList[i][1] );
     }
     printf("\n");
+    int playerPos;
     for (int i = 0; i < 5; i++)
     {
         if( ClubArr[curIndx].transferList[i][0] == 0){
             //call agent 0
+            playerPos = ClubArr[curIndx].transferList[i][1];
+            printf("agent 0\n");
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
         }
         if( ClubArr[curIndx].transferList[i][0] == 1){
-
+            playerPos = ClubArr[curIndx].transferList[i][1];
+            printf("agent 1\n");
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
         }
         if( ClubArr[curIndx].transferList[i][0] == 2){
-
+            playerPos = ClubArr[curIndx].transferList[i][1];
+            printf("agent 2\n");
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
         }
         if( ClubArr[curIndx].transferList[i][0] == 3){
-
+            playerPos = ClubArr[curIndx].transferList[i][1];
+            printf("agent 3\n");
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
         }
     }
-    
-  
 }
 
+
+
 void* initialAgentList(){
+    
     int curIndx = agentIndx++;
     //Random initial amount of players 1-5 for each position
     int forwardAmount = (rand() % (5 + 1 - 1) + 1);
@@ -70,22 +102,18 @@ void* initialAgentList(){
     {
         AgentArr[curIndx].forward[i] = (double)(rand() % (20 + 1 - 4) + 4);
     }
-
     for (int i = 0; i <= midfielderAmount; i++)
     {
         AgentArr[curIndx].midfielder[i] = (double)(rand() % (20 + 1 - 4) + 4);
     }
-
     for (int i = 0; i <= defenderAmount; i++)
     {
         AgentArr[curIndx].defender[i] = (double)(rand() % (20 + 1 - 4) + 4);
     }
-
     for (int i = 0; i <= goalkeeperAmount; i++)
     {
         AgentArr[curIndx].goalkeeper[i] = (double)(rand() % (20 + 1 - 4) + 4);
     }
-    
 }
 
 void* printagents()
@@ -172,13 +200,13 @@ int main(){
     {
         pthread_join(agentsTid[i], NULL);
     }
-    printagents(AgentArr);
+    //printagents(AgentArr);
     //each clubs lists and budgets are randomly generated and their transfer process
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 1; i++)
     {
         pthread_create(&clubsTid[i], NULL, clubThread, NULL);
     }
-     for (int i = 0; i < 5; i++)
+     for (int i = 0; i < 1; i++)
     {
         pthread_join(clubsTid[i], NULL);
     }
