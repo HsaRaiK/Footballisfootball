@@ -25,20 +25,42 @@ double getTeamBudget(){
     int budgetindx = (int)(rand() % (5)); // Random budget of either 10,20,30,40,50
     return (double)budgets[budgetindx];
 }
+int minCost( double players[10]){
+    double min = 1000000;
+    int minIndex;
+    for (int i = 0; i < 10; i++)
+    {
+        if(players[i] != 0 && players[i] < min){
+            min = players[i];
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
 int transfer(int p , int clubIndex, int agentNum){
+    //call scout 
     int playerPos = p;
+    int minIndex;
     switch(playerPos){    
         case 1:    
-            printf("looking for forward - agent %d\n", agentNum);    
+            printf("looking for forward - agent %d\n", agentNum);
+            minIndex = minCost(AgentArr[agentNum].forward); 
+            printf("Agent %d , Forwad, Min Index: %d\n", agentNum, minIndex);
             break;    
-        case 2:    
-            printf("looking for mid - agent %d\n", agentNum);    
+        case 2:   
+            printf("looking for Midfielder - agent %d\n", agentNum);
+            minIndex = minCost(AgentArr[agentNum].midfielder);  
+            printf("Agent %d , Midfielder, Min Index: %d\n", agentNum, minIndex);  
             break;    
-        case 3:    
-            printf("looking for def - agent %d\n", agentNum);    
+        case 3:  
+            printf("looking for Defender - agent %d\n", agentNum);
+            minIndex = minCost(AgentArr[agentNum].defender);   
+            printf("Agent %d , Defender, Min Index: %d\n", agentNum, minIndex);   
             break;  
-        case 4:    
-            printf("looking for goalk - agent %d\n", agentNum);    
+        case 4: 
+            printf("looking for Goalkeeper - agent %d\n", agentNum);
+            minIndex = minCost(AgentArr[agentNum].goalkeeper);    
+            printf("Agent %d , Goalkeeper, Min Index: %d\n", agentNum, minIndex);  
             break;  
         default:    
             break;
@@ -200,7 +222,7 @@ int main(){
     {
         pthread_join(agentsTid[i], NULL);
     }
-    //printagents(AgentArr);
+    printagents(AgentArr);
     //each clubs lists and budgets are randomly generated and their transfer process
     for (int i = 0; i < 1; i++)
     {
