@@ -37,30 +37,62 @@ int minCost( double players[10]){
     }
     return minIndex;
 }
-int transfer(int p , int clubIndex, int agentNum){
+int transfer(int p , int clubIndex, int agentNum, int playerCount){
     //call scout here...
     int playerPos = p; // position of the wanted player
     int minIndex;
     switch(playerPos){    
-        case 1:    
+        case 1://forward    
             printf("looking for forward - agent %d\n", agentNum);
             minIndex = minCost(AgentArr[agentNum].forward); // finding and returning the index of cheapest player
-            printf("Agent %d , Forwad, Min Index: %d\n", agentNum, minIndex);
+            printf("Agent %d , forward, Min Index: %d\n", agentNum, minIndex);  
+            // Check if club has enough budget, if it has, remove player from agent list 
+            // update budget and set transfer value to 1
+            // i update the transfer value twice, because i thought i would write the code differently
+            // but now i'm too lazy to change it, and the code works so...
+            if(ClubArr[clubIndex].budget >= AgentArr[agentNum].forward[minIndex]){
+                ClubArr[clubIndex].budget -= AgentArr[agentNum].forward[minIndex];
+                AgentArr[agentNum].forward[minIndex] = 0;
+                ClubArr[clubIndex].transferList[playerCount][2] = 1;
+                printf("forward transferred!, budget : %.2f\n", ClubArr[clubIndex].budget);
+                return 1;
+            }
             break;    
-        case 2:   
+        case 2://midfielder     
             printf("looking for Midfielder - agent %d\n", agentNum);
-            minIndex = minCost(AgentArr[agentNum].midfielder);  
-            printf("Agent %d , Midfielder, Min Index: %d\n", agentNum, minIndex);  
+            minIndex = minCost(AgentArr[agentNum].midfielder);
+            printf("Agent %d , Midfielder, Min Index: %d\n", agentNum, minIndex);    
+            if(ClubArr[clubIndex].budget >= AgentArr[agentNum].midfielder[minIndex]){
+                ClubArr[clubIndex].budget -= AgentArr[agentNum].midfielder[minIndex];
+                AgentArr[agentNum].midfielder[minIndex] = 0;
+                ClubArr[clubIndex].transferList[playerCount][2] = 1;
+                printf("midfielder transferred!, budget : %.2f\n", ClubArr[clubIndex].budget);
+                return 1;
+            }
             break;    
-        case 3:  
+        case 3://defender    
             printf("looking for Defender - agent %d\n", agentNum);
-            minIndex = minCost(AgentArr[agentNum].defender);   
-            printf("Agent %d , Defender, Min Index: %d\n", agentNum, minIndex);   
+            minIndex = minCost(AgentArr[agentNum].defender); 
+            printf("Agent %d , Midfielder, Min Index: %d\n", agentNum, minIndex);  
+            if(ClubArr[clubIndex].budget >= AgentArr[agentNum].defender[minIndex]){
+                ClubArr[clubIndex].budget -= AgentArr[agentNum].defender[minIndex];
+                AgentArr[agentNum].defender[minIndex] = 0;
+                ClubArr[clubIndex].transferList[playerCount][2] = 1;
+                printf("defender transferred!, budget : %.2f\n", ClubArr[clubIndex].budget);
+                return 1;
+            }     
             break;  
-        case 4: 
+        case 4://goalkeeper  
             printf("looking for Goalkeeper - agent %d\n", agentNum);
-            minIndex = minCost(AgentArr[agentNum].goalkeeper);    
-            printf("Agent %d , Goalkeeper, Min Index: %d\n", agentNum, minIndex);  
+            minIndex = minCost(AgentArr[agentNum].goalkeeper);
+            printf("Agent %d , goalkeeper, Min Index: %d\n", agentNum, minIndex);   
+            if(ClubArr[clubIndex].budget >= AgentArr[agentNum].goalkeeper[minIndex]){
+                ClubArr[clubIndex].budget -= AgentArr[agentNum].goalkeeper[minIndex];
+                AgentArr[agentNum].goalkeeper[minIndex] = 0;
+                ClubArr[clubIndex].transferList[playerCount][2] = 1;
+                printf("goalkeeper transferred!, budget : %.2f\n", ClubArr[clubIndex].budget);
+                return 1;
+            }  
             break;  
         default:    
             break;
@@ -86,14 +118,15 @@ void* clubThread(){
     int playerPos;
     for (int i = 0; i < 5; i++)
     {
+        // call agent, if no transfer is made, wait a bit and try again.
         if( ClubArr[curIndx].transferList[i][0] == 0){
             //call agent 0
             playerPos = ClubArr[curIndx].transferList[i][1];
             printf("agent 0\n");
-            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i); 
             if(ClubArr[curIndx].transferList[i][2] == 0){
                 //wait();
-                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
                 if(ClubArr[curIndx].transferList[i][2] == 0){
                     break; // if can't make the transfer, end transfer period
                 }
@@ -102,10 +135,10 @@ void* clubThread(){
         if( ClubArr[curIndx].transferList[i][0] == 1){
             playerPos = ClubArr[curIndx].transferList[i][1];
             printf("agent 1\n");
-            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
             if(ClubArr[curIndx].transferList[i][2] == 0){
                 //wait();
-                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
                 if(ClubArr[curIndx].transferList[i][2] == 0){
                     break; // if can't make the transfer, end transfer period
                 }
@@ -114,10 +147,10 @@ void* clubThread(){
         if( ClubArr[curIndx].transferList[i][0] == 2){
             playerPos = ClubArr[curIndx].transferList[i][1];
             printf("agent 2\n");
-            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
             if(ClubArr[curIndx].transferList[i][2] == 0){
                 //wait();
-                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
                 if(ClubArr[curIndx].transferList[i][2] == 0){
                     break; // if can't make the transfer, end transfer period
                 }
@@ -126,10 +159,10 @@ void* clubThread(){
         if( ClubArr[curIndx].transferList[i][0] == 3){
             playerPos = ClubArr[curIndx].transferList[i][1];
             printf("agent 3\n");
-            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+            ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
             if(ClubArr[curIndx].transferList[i][2] == 0){
                 //wait();
-                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0]);
+                ClubArr[curIndx].transferList[i][2] = transfer(playerPos,curIndx,ClubArr[curIndx].transferList[i][0], i);
                 if(ClubArr[curIndx].transferList[i][2] == 0){
                     break; // if can't make the transfer, end transfer period
                 }
@@ -169,67 +202,31 @@ void* initialAgentList(){
 void* printagents()
 {
     printf(" ============ \t ============ \t ============ \t ============ \n");
-    for (int i=0; i<4; i++)
+    for (int i = 0; i < 4; i++)
     {
-        //int F_size = sizeof(AgentArr[i].forward);
-        int ordergiver = 0;
-        printf("Agent %d :  Forward players : \n",i+1);
-        for (int j=0; j<10; j++)
+        printf("Agent %d\n", i);
+        printf("Forward[ ");
+        for (int j = 0; j < 10; j++)
         {
-            if (AgentArr[i].forward[j] != 0)
-            {
-                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].forward[j] );
-            }
-            else
-            {
-                ordergiver++;
-            }    
+            printf("%0.1f - ",AgentArr[i].forward[j]);
         }
-        printf("\n \n");
-        ordergiver = 0;
-        printf("Agent %d :  Midfielder players : \n",i+1 );
-        for (int j=0; j<10; j++)
+        printf("]\nmidfielder[ ");
+        for (int k = 0; k < 10; k++)
         {
-            if (AgentArr[i].midfielder[j] != 0)
-            {
-                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].midfielder[j] );
-            }
-            else
-            {
-                ordergiver++;
-            }
+            printf("%0.1f - ",AgentArr[i].midfielder[k]);
         }
-        printf("\n \n");
-        ordergiver = 0;
-        printf("Agent %d :  Defender Players : \n", i+1);
-        for (int j=0; j<10; j++)
+        printf("]\ndefender[ ");
+        for (int g = 0; g < 10; g++)
         {
-            if (AgentArr[i].defender[j] != 0)
-            {
-                printf("- pl %d : %.2lf M -",j-ordergiver+1,AgentArr[i].defender[j] );
-            }
-            else
-            {
-                ordergiver++;
-            }
+            printf("%0.1f - ",AgentArr[i].defender[g]);
         }
-        printf("\n \n");
-        ordergiver = 0;
-        printf("Agent %d :  Goal keepers : \n", i+1);
-        for (int j=0; j<10; j++)
+        printf("]\ngoalkeeper[ ");
+        for (int h = 0; h < 10; h++)
         {
-            if (AgentArr[i].goalkeeper[j] != 0)
-            {
-                printf("- pl%d : %.2lf M -",j-ordergiver+1,AgentArr[i].goalkeeper[j] );
-            }
-            else
-            {
-                ordergiver++;
-            }
+            printf("%0.1f - ",AgentArr[i].goalkeeper[h]);
         }
-        printf("\n \n");
-        ordergiver = 0;
-        printf(" --- \n");
+        printf("]\n\n");
+        
     }
     printf(" ============ \t ============ \t ============ \t ============ \n");
 }
@@ -250,7 +247,7 @@ int main(){
     {
         pthread_join(agentsTid[i], NULL);
     }
-    printagents(AgentArr);
+    printagents();
     //each clubs lists and budgets are randomly generated and their transfer process
     for (int i = 0; i < 1; i++)
     {
@@ -260,5 +257,5 @@ int main(){
     {
         pthread_join(clubsTid[i], NULL);
     }
-
+    printagents();
 }
