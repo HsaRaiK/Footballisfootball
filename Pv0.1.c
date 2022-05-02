@@ -21,6 +21,7 @@ struct Agents AgentArr[4];
 int agentIndx = 0;
 struct Clubs ClubArr[5]; 
 int clubIndx = 0;
+int scoutIndx = 0;
 sem_t agentOne;
 sem_t agentTwo;
 sem_t agentThree;
@@ -113,10 +114,27 @@ int transfer(int p , int clubIndex, int agentNum, int playerCount){
     return 0; 
 }
 
-void* scoutMethod(void *input)
+void* scoutMethod()
 {
-    sem_wait(&scoutlock);
-    int a = (int *)input;
+int a = scoutIndx++;   
+    switch(a)
+    {
+        case 0:
+        sem_wait(&agentOne);
+        break;
+        case 1:
+        sem_wait(&agentTwo);
+        break;
+        case 2:
+        sem_wait(&agentThree);
+        break;
+        case 3:
+        sem_wait(&agentFour);
+        break;      
+    }
+    
+    //sem_wait(&scoutlock);
+    //int a = (int *)input;
     sleep((rand() % (5 + 1 - 1) + 1));
     // int a as the arguement will determine which agent is going to be affected , taken as an arguemnt to the function
     
@@ -141,7 +159,8 @@ void* scoutMethod(void *input)
                     break;
                 }
                 printf("New player added to agent %d , forward \n", a);
-             case 1:
+                break;
+            case 1:
                 for (int i=0; i< sizeof(AgentArr[a].midfielder) ; i++)
                 {
                     if(AgentArr[a].midfielder == 0)
@@ -153,7 +172,8 @@ void* scoutMethod(void *input)
                     break;    
                 } 
                 printf("New player added to agent %d , midfielder \n", a);
-             case 2:
+                break;
+            case 2:
                 for (int i=0; i< sizeof(AgentArr[a].defender) ; i++)
                 {
                     if(AgentArr[a].defender == 0)
@@ -165,7 +185,8 @@ void* scoutMethod(void *input)
                     break;
                 }
                 printf("New player added to agent %d , defender \n", a);
-             case 3:
+                break;
+            case 3:
                 for (int i=0; i< sizeof(AgentArr[a].goalkeeper) ; i++)
                 {
                     if(AgentArr[a].goalkeeper == 0)
@@ -177,6 +198,7 @@ void* scoutMethod(void *input)
                     break;
                 } 
                 printf("New player added to agent %d , goalkeeper \n", a);
+                break;
         } 
     }               
     else if(3 < newPlayerChance < 8)
@@ -236,7 +258,22 @@ void* scoutMethod(void *input)
         printf(" No Price Changed, No player added \n \n ");
     }
     //sem_post(&scout); 
-    sem_post(&scoutlock);           
+    switch(a)
+    {
+        case 0:
+            sem_post(&agentOne);
+            break;
+        case 1:
+            sem_post(&agentTwo);
+            break;
+        case 2:
+            sem_post(&agentThree);
+            break;
+        case 3:
+            sem_post(&agentFour);
+            break;      
+    } 
+            
 }
 
 void* clubThread(){
@@ -420,7 +457,7 @@ int main(){
     sem_init(&agentThree, 0, 1);
     sem_init(&agentFour, 0, 1);
     sem_init(&printList, 0, 1);
-    sem_init(&scoutlock,0,1);
+    sem_init(&scoutlock,0, 1);
 
     //create the player lists for each agent on their own thread
     for (int i = 0; i < 4; i++)
@@ -436,13 +473,9 @@ int main(){
 
     for (int i = 0; i < 4; i++)
     {
-        pthread_create(&scoutsTid[i], NULL, scoutMethod, i);
+        pthread_create(&scoutsTid[i], NULL, scoutMethod, NULL);
     }
-    /*for (int i = 0; i < 4; i++)
-    {
-        pthread_join(scoutsTid[i], NULL);
-    }*/
-
+  
     //each clubs lists and budgets are randomly generated and their transfer process
     for (int i = 0; i < 5; i++)
     {
@@ -452,6 +485,12 @@ int main(){
     {
         pthread_join(clubsTid[i], NULL);
     }
+
+    for (int i = 0; i < 4; i++)
+    {
+        pthread_join(scoutsTid[i], NULL);
+    }
+
     printagents();
     sem_destroy(&agentOne);
     sem_destroy(&agentTwo);
