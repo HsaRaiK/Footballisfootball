@@ -33,6 +33,7 @@ sem_t agentFour;
 //sem_t scout ;
 sem_t scoutlock;
 sem_t printList;
+int scouts = 1;
 
 double getTeamBudget(){
     int budgets[5] = {10,20,30,40,50} ;
@@ -117,7 +118,9 @@ int transfer(int p , int clubIndex, int agentNum, int playerCount){
 void* scoutMethod()
 {
 int a = scoutIndx++;   
-    switch(a)
+while(scouts){
+    sleep((rand() % (3 + 1 - 1) + 1));
+        switch(a)
     {
         case 0:
         sem_wait(&agentOne);
@@ -208,48 +211,50 @@ int a = scoutIndx++;
         {
             case 0:
                 // Decrease the price of every single player of that agent if player exists
-                for (int i = 0; i < sizeof(AgentArr[a].forward); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].forward[i] != 0)
                         AgentArr[a].forward[i] -= 0.5;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].midfielder); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].midfielder[i] != 0)
                         AgentArr[a].midfielder[i] -= 0.5;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].defender); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].defender[i] != 0)
                         AgentArr[a].defender[i] -= 0.5;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].goalkeeper); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].goalkeeper[i] != 0)
                         AgentArr[a].goalkeeper[i] -= 0.5;
                 }
+                break;
             case 1:
                 // Increase the price of every single player of that agent if player exists
-                for (int i = 0; i < sizeof(AgentArr[a].forward); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].forward[i] != 0)
                         AgentArr[a].forward[i] += 1;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].midfielder); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].midfielder[i] != 0)
                         AgentArr[a].midfielder[i] += 1;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].defender); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].defender[i] != 0)
                         AgentArr[a].defender[i] += 1;
                 }
-                for (int i = 0; i < sizeof(AgentArr[a].goalkeeper); i++) 
+                for (int i = 0; i < 10; i++) 
                 {
                     if (AgentArr[a].goalkeeper[i] != 0)
                         AgentArr[a].goalkeeper[i] += 1;
                 }
+                break;
         }
     }
     else if(newPlayerChance >7)
@@ -272,8 +277,9 @@ int a = scoutIndx++;
         case 3:
             sem_post(&agentFour);
             break;      
-    } 
-            
+    }       
+}
+     
 }
 
 void* clubThread(){
@@ -446,7 +452,6 @@ void* printagents()
 }
 
 int main(){
-
     time_t t;
     srand((unsigned) time(&t));
     pthread_t clubsTid[5];
@@ -485,12 +490,12 @@ int main(){
     {
         pthread_join(clubsTid[i], NULL);
     }
-
+    scouts = 0;
     for (int i = 0; i < 4; i++)
     {
         pthread_join(scoutsTid[i], NULL);
     }
-
+    
     printagents();
     sem_destroy(&agentOne);
     sem_destroy(&agentTwo);
