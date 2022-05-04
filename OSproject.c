@@ -7,34 +7,38 @@
 #include <unistd.h>
 struct Clubs{
     char name;
-    double budget;
-    int transferList[5][3];
+    double budget; //budget of the club
+    int transferList[5][3]; // clubs transfer list, 5 players[5], agent for player[0], player position[1], player transfer val[2]
 };
 struct Agents{
+    //each array holds the prices of the players for the agent
     double forward[10];
     double midfielder[10];
     double defender[10];
     double goalkeeper[10];
 };
 
-struct Agents AgentArr[4];
-int agentIndx = 0;
-struct Clubs ClubArr[5]; 
-int clubIndx = 0;
-int scoutIndx = 0;
+struct Agents AgentArr[4]; // 4 agents are used
+int agentIndx = 0; // used to keep keep track of agents inside their functions
+struct Clubs ClubArr[5]; // 5 clubs are used
+int clubIndx = 0; // used to keep keep track of clubs inside their threads
+int scoutIndx = 0; // used to keep keep track of scouts inside their threads
+// each agent has their own lock
 sem_t agentOne;
 sem_t agentTwo;
 sem_t agentThree;
 sem_t agentFour;
-sem_t scoutlock;
+// used while printing some info to make it more readable
 sem_t printList;
 int scouts = 1;
 
+//generating random value for team budget 
 double getTeamBudget(){
     int budgets[5] = {10,20,30,40,50} ;
     int budgetindx = (int)(rand() % (5)); // Random budget of either 10,20,30,40,50
     return (double)budgets[budgetindx];
 }
+//finds the location for the cheapest player given the array
 int minCost( double players[10]){
     double min = 1000000;
     int minIndex;
@@ -47,6 +51,8 @@ int minCost( double players[10]){
     }
     return minIndex;
 }
+//used for the transfers, finding the cheapes player for the given position from the given agent number
+//player count is the number of player on the list of 5 players
 int transfer(int p , int clubIndex, int agentNum, int playerCount){
     int playerPos = p; // position of the wanted player
     int minIndex;
@@ -106,7 +112,7 @@ int transfer(int p , int clubIndex, int agentNum, int playerCount){
         default:    
             break;
     }    
-    return 0; 
+    return 0; // no transfer is made so returning 0
 }
 
 void* scoutMethod()
@@ -272,12 +278,13 @@ while(scouts){
      
 }
 
+//function that generates the values for each club struct, afterwards manages the transfer cycle.
 void* clubThread(){
     int curIndx = clubIndx++;
     ClubArr[curIndx].budget = getTeamBudget();
     ClubArr[curIndx].name = 'A' + curIndx;
     int max = 0;
-    sem_wait(&printList);
+    sem_wait(&printList); // used so the prints look more readable
     printf("Team %c: %.1fM $\n",ClubArr[curIndx].name, ClubArr[curIndx].budget);
     // tansferlist = 5 players [0-5], agent number, player position and transfer value [2] = {agentnum, playerpos, transfer value}
     for (int i = 0; i < 5; i++)
@@ -370,7 +377,8 @@ void* clubThread(){
 }
 
 
-
+// generates the player lists for each agent randomly
+// each position has random amount of players from 1 to 5 with random prices
 void* initialAgentList(){
     
     int curIndx = agentIndx++;
@@ -397,6 +405,7 @@ void* initialAgentList(){
     }
 }
 
+//used to print the contents of each agents player arrays
 void* printagents()
 {
     printf(" ============ \t ============ \t ============ \t ============ \n");
@@ -452,7 +461,6 @@ int main(){
     sem_init(&agentThree, 0, 1);
     sem_init(&agentFour, 0, 1);
     sem_init(&printList, 0, 1);
-    sem_init(&scoutlock,0, 1);
 
     //create the player lists for each agent on their own thread
     for (int i = 0; i < 4; i++)
@@ -466,12 +474,13 @@ int main(){
     }
     printagents();
 
+    //scouts are created on their own threads, one for each agent
     for (int i = 0; i < 4; i++)
     {
         pthread_create(&scoutsTid[i], NULL, scoutMethod, NULL);
     }
   
-    //each clubs lists and budgets are randomly generated and their transfer process
+    //each clubs lists and budgets are randomly generated and their transfer process is managed inside the thread
     for (int i = 0; i < 5; i++)
     {
         pthread_create(&clubsTid[i], NULL, clubThread, NULL);
@@ -480,18 +489,18 @@ int main(){
     {
         pthread_join(clubsTid[i], NULL);
     }
-    scouts = 0; // stop the scouts from doing anything because transfer period is over.
+    //transfer process ends after all club threads join
+    scouts = 0; // stop the scouts from updating agents because transfer period is over.
     for (int i = 0; i < 4; i++)
     {
         pthread_join(scoutsTid[i], NULL);
     }
     
-    printagents();
+    printagents(); // printing the final lists agents have 
     sem_destroy(&agentOne);
     sem_destroy(&agentTwo);
     sem_destroy(&agentThree);
     sem_destroy(&agentFour);
     sem_destroy(&printList);
-    sem_destroy(&scoutlock);
 
 }
