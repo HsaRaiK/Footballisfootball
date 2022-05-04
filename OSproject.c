@@ -48,7 +48,6 @@ int minCost( double players[10]){
     return minIndex;
 }
 int transfer(int p , int clubIndex, int agentNum, int playerCount){
-    //call scout here...
     int playerPos = p; // position of the wanted player
     int minIndex;
     switch(playerPos){    
@@ -131,12 +130,9 @@ while(scouts){
         break;      
     }
     
-    //sem_wait(&scoutlock);
-    //int a = (int *)input;
     sleep((rand() % (5 + 1 - 1) + 1));
     // int a as the arguement will determine which agent is going to be affected , taken as an arguemnt to the function
     
-    //sem_wait(&scout);
     int newPlayerChance = (rand() % 10); // Deciding to either add a new player to a club or update the price 
     int newPlayerPosition = (rand () % 4); // Decides the type of player that is to be added
     int priceStrat  = (rand() % 2); // Choosing to either increase or decrease the price of a player
@@ -257,7 +253,6 @@ while(scouts){
         // No price changed, no player added.
         printf(" No Price Changed, No player added \n \n ");
     }
-    //sem_post(&scout); 
     switch(a)
     {
         case 0:
