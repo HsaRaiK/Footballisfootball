@@ -298,7 +298,7 @@ void* clubThread(){
     sem_post(&printList);
     sleep((rand() % (3 + 1)));//so club A doesn't always go first
     int playerPos;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
         // call agent, if no transfer is made, wait a bit and try again.
         if( ClubArr[curIndx].transferList[i][0] == 0){
@@ -370,7 +370,7 @@ void* clubThread(){
                 }
             }
         }
-        if( i == 3){
+        if( i == 4){
             printf("Club %c list complete!\n", ClubArr[curIndx].name);
         }
     }
